@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Team Task Manager</title>
+    <link rel="icon" href="/mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/styles.css">
+    <script defer src="/app.js"></script>
+  </head>
+  <body>
+    <main id="auth-view" class="auth-layout">
+      <section class="auth-panel">
+        <div class="auth-brand">
+          <img src="/mark.svg" alt="" width="44" height="44">
+          <div>
+            <h1>Team Task Manager</h1>
+            <p>Projects, tasks, roles, and progress in one workspace.</p>
+          </div>
+        </div>
+
+        <div class="auth-tabs" role="tablist" aria-label="Authentication">
+          <button type="button" class="auth-tab active" data-auth-tab="login">Login</button>
+          <button type="button" class="auth-tab" data-auth-tab="signup">Signup</button>
+        </div>
+
+        <form id="login-form" class="auth-form">
+          <label>
+            Email
+            <input name="email" type="email" autocomplete="email" required>
+          </label>
+          <label>
+            Password
+            <input name="password" type="password" autocomplete="current-password" required>
+          </label>
+          <button type="submit" class="primary-button">Login</button>
+        </form>
+
+        <form id="signup-form" class="auth-form" hidden>
+          <label>
+            Name
+            <input name="name" type="text" autocomplete="name" required maxlength="100">
+          </label>
+          <label>
+            Email
+            <input name="email" type="email" autocomplete="email" required>
+          </label>
+          <label>
+            Password
+            <input name="password" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <button type="submit" class="primary-button">Create Account</button>
+        </form>
+      </section>
+    </main>
+
+    <main id="app-view" class="app-shell" hidden>
+      <aside class="sidebar">
+        <div class="brand-row">
+          <img src="/mark.svg" alt="" width="36" height="36">
+          <strong>Team Task Manager</strong>
+        </div>
+
+        <div class="user-panel">
+          <span id="user-name"></span>
+          <button id="logout-button" type="button" class="ghost-button">Logout</button>
+        </div>
+
+        <form id="project-form" class="stacked-form">
+          <h2>New Project</h2>
+          <label>
+            Name
+            <input name="name" type="text" maxlength="140" required>
+          </label>
+          <label>
+            Description
+            <textarea name="description" rows="3" maxlength="2000"></textarea>
+          </label>
+          <button type="submit" class="primary-button">Create</button>
+        </form>
+
+        <form id="join-form" class="stacked-form">
+          <h2>Join Project</h2>
+          <label>
+            Invite Code
+            <input name="inviteCode" type="text" maxlength="16" required>
+          </label>
+          <button type="submit" class="secondary-button">Join</button>
+        </form>
+
+        <nav class="project-nav" aria-label="Projects">
+          <h2>Projects</h2>
+          <div id="project-list" class="project-list"></div>
+        </nav>
+      </aside>
+
+      <section class="workspace">
+        <div id="empty-state" class="empty-state">
+          <h2>No project selected</h2>
+          <p>Create a project or join one with an invite code.</p>
+        </div>
+
+        <div id="project-view" class="project-view" hidden>
+          <header class="project-header">
+            <div>
+              <div class="project-kicker">
+                <span id="project-role" class="role-badge"></span>
+                <span id="project-invite" class="invite-code"></span>
+              </div>
+              <h1 id="project-title"></h1>
+              <p id="project-description"></p>
+            </div>
+            <div class="header-actions">
+              <button id="new-task-button" type="button" class="primary-button">New Task</button>
+            </div>
+          </header>
+
+          <section class="dashboard-grid" aria-label="Dashboard">
+            <article class="metric-card">
+              <span>Total Tasks</span>
+              <strong id="metric-total">0</strong>
+            </article>
+            <article class="metric-card">
+              <span>To Do</span>
+              <strong id="metric-todo">0</strong>
+            </article>
+            <article class="metric-card">
+              <span>In Progress</span>
+              <strong id="metric-progress">0</strong>
+            </article>
+            <article class="metric-card warning">
+              <span>Overdue</span>
+              <strong id="metric-overdue">0</strong>
+            </article>
+          </section>
+
+          <section class="insight-layout">
+            <div class="insight-panel">
+              <h2>Tasks By Status</h2>
+              <div id="status-breakdown" class="bar-list"></div>
+            </div>
+            <div class="insight-panel">
+              <h2>Tasks Per User</h2>
+              <div id="user-breakdown" class="bar-list"></div>
+            </div>
+            <div class="insight-panel">
+              <h2>Overdue Tasks</h2>
+              <div id="overdue-list" class="compact-list"></div>
+            </div>
+          </section>
+
+          <section class="board" aria-label="Tasks">
+            <div class="task-column" data-column="To Do">
+              <h2>To Do</h2>
+              <div id="todo-column" class="task-list"></div>
+            </div>
+            <div class="task-column" data-column="In Progress">
+              <h2>In Progress</h2>
+              <div id="progress-column" class="task-list"></div>
+            </div>
+            <div class="task-column" data-column="Done">
+              <h2>Done</h2>
+              <div id="done-column" class="task-list"></div>
+            </div>
+          </section>
+
+          <section class="members-section">
+            <div class="section-heading">
+              <h2>Members</h2>
+            </div>
+            <form id="member-form" class="member-form">
+              <input name="email" type="email" placeholder="user@example.com" required>
+              <select name="role" aria-label="Role">
+                <option value="Member">Member</option>
+                <option value="Admin">Admin</option>
+              </select>
+              <button type="submit" class="secondary-button">Add Member</button>
+            </form>
+            <div id="member-list" class="member-list"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="task-dialog">
+      <form id="task-form" method="dialog" class="dialog-form">
+        <div class="dialog-heading">
+          <h2 id="task-dialog-title">New Task</h2>
+          <button type="button" class="ghost-button" id="task-dialog-close">Close</button>
+        </div>
+        <input type="hidden" name="taskId">
+        <label>
+          Title
+          <input name="title" type="text" maxlength="180" required>
+        </label>
+        <label>
+          Description
+          <textarea name="description" rows="4" maxlength="4000"></textarea>
+        </label>
+        <div class="form-grid">
+          <label>
+            Due Date
+            <input name="dueDate" type="date">
+          </label>
+          <label>
+            Priority
+            <select name="priority">
+              <option>Low</option>
+              <option selected>Medium</option>
+              <option>High</option>
+            </select>
+          </label>
+          <label>
+            Status
+            <select name="status">
+              <option>To Do</option>
+              <option>In Progress</option>
+              <option>Done</option>
+            </select>
+          </label>
+          <label>
+            Assignee
+            <select name="assignedTo" id="task-assignee"></select>
+          </label>
+        </div>
+        <div class="dialog-actions">
+          <button type="submit" class="primary-button">Save Task</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </body>
+</html>

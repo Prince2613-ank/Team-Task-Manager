@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Team Task Manager">
+  <rect width="48" height="48" rx="8" fill="#174E4A"/>
+  <path d="M14 16h20v4H14zM14 23h14v4H14zM14 30h10v4H14z" fill="#F7F3E8"/>
+  <path d="m31 30 3 3 7-8" fill="none" stroke="#E7B84D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
