@@ -31,7 +31,9 @@ dashboardRouter.get('/projects/:projectId/dashboard', async (req, res, next) => 
       await Promise.all([
         query(
           `
-            SELECT COUNT(*)::int AS "totalTasks"
+            SELECT
+              COUNT(*)::int AS "totalTasks",
+              COUNT(CASE WHEN t.due_date < CURRENT_DATE AND t.status <> 'Done' THEN 1 END)::int AS "overdueCount"
             FROM tasks t
             WHERE t.project_id = $1
             ${memberScope}
@@ -95,7 +97,7 @@ dashboardRouter.get('/projects/:projectId/dashboard', async (req, res, next) => 
         totalTasks: totals[0].totalTasks,
         byStatus,
         perUser: perUserRows,
-        overdueCount: overdueRows.length,
+        overdueCount: totals[0].overdueCount,
         overdueTasks: overdueRows
       }
     });

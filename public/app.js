@@ -285,9 +285,11 @@ function bindEvents() {
         return;
       }
 
-      await api(`/tasks/${taskId}`, { method: 'DELETE' });
-      await refreshProject();
-      showToast('Task deleted');
+      await runAction(async () => {
+        await api(`/tasks/${taskId}`, { method: 'DELETE' });
+        await refreshProject();
+        showToast('Task deleted');
+      });
       return;
     }
 
@@ -297,9 +299,11 @@ function bindEvents() {
         return;
       }
 
-      await api(`/projects/${state.selectedProjectId}/members/${userId}`, { method: 'DELETE' });
-      await refreshProject();
-      showToast('Member removed');
+      await runAction(async () => {
+        await api(`/projects/${state.selectedProjectId}/members/${userId}`, { method: 'DELETE' });
+        await refreshProject();
+        showToast('Member removed');
+      });
     }
   });
 
@@ -309,23 +313,27 @@ function bindEvents() {
 
     if (statusSelect) {
       const taskId = Number(statusSelect.dataset.taskStatus);
-      await api(`/tasks/${taskId}`, {
-        method: 'PUT',
-        body: { status: statusSelect.value }
-      });
-      await refreshProject();
-      showToast('Task updated');
+      await runAction(async () => {
+        await api(`/tasks/${taskId}`, {
+          method: 'PUT',
+          body: { status: statusSelect.value }
+        });
+        await refreshProject();
+        showToast('Task updated');
+      }, true);
       return;
     }
 
     if (roleSelect) {
       const userId = Number(roleSelect.dataset.memberRole);
-      await api(`/projects/${state.selectedProjectId}/members/${userId}`, {
-        method: 'PUT',
-        body: { role: roleSelect.value }
-      });
-      await refreshProject();
-      showToast('Role updated');
+      await runAction(async () => {
+        await api(`/projects/${state.selectedProjectId}/members/${userId}`, {
+          method: 'PUT',
+          body: { role: roleSelect.value }
+        });
+        await refreshProject();
+        showToast('Role updated');
+      }, true);
     }
   });
 
@@ -352,6 +360,18 @@ async function submitForm(form, callback) {
     showToast(error.message);
   } finally {
     setBusy(form, false);
+  }
+}
+
+async function runAction(callback, refreshOnError = false) {
+  try {
+    await callback();
+  } catch (error) {
+    showToast(error.message);
+
+    if (refreshOnError && state.selectedProjectId) {
+      await refreshProject();
+    }
   }
 }
 
@@ -412,7 +432,7 @@ function renderProjects() {
     return `
       <button type="button" class="project-button ${project.id === state.selectedProjectId ? 'active' : ''}" data-project-id="${project.id}">
         <strong>${escapeHtml(project.name)}</strong>
-        <span>${escapeHtml(project.role)} · ${done}/${total} done · ${project.memberCount} members</span>
+        <span>${escapeHtml(project.role)} - ${done}/${total} done - ${project.memberCount} members</span>
       </button>
     `;
   }).join('');
@@ -471,7 +491,7 @@ function renderDashboard() {
   els.overdueList.innerHTML = dashboard.overdueTasks.map((task) => `
     <div class="compact-item">
       <strong>${escapeHtml(task.title)}</strong>
-      <span>${escapeHtml(task.dueDate)} · ${escapeHtml(task.assignedName || 'Unassigned')}</span>
+      <span>${escapeHtml(task.dueDate)} - ${escapeHtml(task.assignedName || 'Unassigned')}</span>
     </div>
   `).join('');
 }
@@ -485,14 +505,13 @@ function renderBars(container, rows) {
   const max = Math.max(...rows.map((row) => Number(row.count)), 1);
   container.innerHTML = rows.map((row) => {
     const count = Number(row.count || 0);
-    const width = Math.max((count / max) * 100, count > 0 ? 8 : 0);
     return `
       <div class="bar-row">
         <div class="bar-label">
           <span>${escapeHtml(row.label)}</span>
           <span>${count}</span>
         </div>
-        <div class="bar-track"><div class="bar-fill" style="width: ${width}%"></div></div>
+        <progress class="bar-progress" max="${max}" value="${count}" aria-label="${escapeHtml(row.label)}: ${count}"></progress>
       </div>
     `;
   }).join('');
@@ -577,7 +596,7 @@ function renderMembers() {
       <div class="member-row">
         <div class="member-main">
           <strong>${escapeHtml(member.name)}</strong>
-          <span>${escapeHtml(member.email)} · ${member.assignedTasks} assigned</span>
+          <span>${escapeHtml(member.email)} - ${member.assignedTasks} assigned</span>
         </div>
         ${controls}
       </div>

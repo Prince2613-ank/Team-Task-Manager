@@ -44,6 +44,10 @@ app.use('/api/projects', projectRouter);
 app.use('/api', taskRouter);
 app.use('/api', dashboardRouter);
 
+app.use('/api', (_req, res) => {
+  res.status(404).json({ message: 'API route not found' });
+});
+
 app.get('*', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
