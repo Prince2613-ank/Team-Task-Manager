@@ -124,7 +124,21 @@ async function api(path, options = {}) {
 }
 
 function formValues(form) {
-  return Object.fromEntries(new FormData(form).entries());
+  const values = {};
+
+  for (const element of form.elements) {
+    if (!element.name) {
+      continue;
+    }
+
+    if ((element.type === 'checkbox' || element.type === 'radio') && !element.checked) {
+      continue;
+    }
+
+    values[element.name] = element.value;
+  }
+
+  return values;
 }
 
 function showAuth() {

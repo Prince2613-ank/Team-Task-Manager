@@ -50,7 +50,17 @@ A full-stack team task management web application built with Node.js, Express, P
    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/team_task_manager
    JWT_SECRET=replace-with-a-long-random-secret
    DATABASE_SSL=false
+   USE_EMBEDDED_DB=false
    ```
+
+   For quick local development without installing PostgreSQL, set:
+
+   ```env
+   USE_EMBEDDED_DB=true
+   PGLITE_DATA_DIR=.data/pglite
+   ```
+
+   The embedded database is only for local development. Railway/production should use the real PostgreSQL `DATABASE_URL`.
 
 4. Start the app.
 
@@ -61,6 +71,8 @@ A full-stack team task management web application built with Node.js, Express, P
 5. Open `http://localhost:3000`.
 
 The app initializes the database schema automatically from `sql/schema.sql` on startup.
+
+If local startup fails with `getaddrinfo ENOTFOUND` for a host such as `postgres.railway.internal` or `dpg-...-a`, your `.env` contains a private cloud database hostname that only works inside that hosting provider. Use a local PostgreSQL URL, set `USE_EMBEDDED_DB=true`, or copy the provider's public/external database URL.
 
 ## Railway Deployment
 

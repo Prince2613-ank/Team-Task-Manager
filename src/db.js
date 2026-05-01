@@ -59,6 +59,9 @@ async function createEmbeddedPool() {
   console.warn(`Using embedded local database at ${dataDir}. Set DATABASE_URL to a reachable PostgreSQL URL for shared data.`);
 
   return {
+    exec(text) {
+      return client.exec(text);
+    },
     query(text, params = []) {
       return client.query(text, params);
     },
@@ -79,6 +82,12 @@ async function createEmbeddedPool() {
 export async function initDb() {
   const schemaPath = path.join(__dirname, '..', 'sql', 'schema.sql');
   const schema = fs.readFileSync(schemaPath, 'utf8');
+
+  if (typeof pool.exec === 'function') {
+    await pool.exec(schema);
+    return;
+  }
+
   await pool.query(schema);
 }
 
