@@ -7,12 +7,14 @@ const { Pool } = pg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = getConnectionString();
 const isDevCommand = process.env.npm_lifecycle_event === 'dev';
 const isProduction = process.env.NODE_ENV === 'production' && !isDevCommand;
 
 if (!connectionString && isProduction) {
-  throw new Error('DATABASE_URL is required. Copy .env.example to .env and set your PostgreSQL connection string.');
+  throw new Error(
+    'DATABASE_URL is required in production. On Railway, add a PostgreSQL service and set the app service variable DATABASE_URL=${{Postgres.DATABASE_URL}}.'
+  );
 }
 
 const useSsl = process.env.DATABASE_SSL === 'true';
@@ -29,6 +31,27 @@ export const pool = useEmbeddedDb
     connectionString,
     ssl: useSsl ? { rejectUnauthorized: false } : false
   });
+
+function getConnectionString() {
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL;
+  }
+
+  if (process.env.DATABASE_PUBLIC_URL) {
+    return process.env.DATABASE_PUBLIC_URL;
+  }
+
+  const { PGHOST, PGPORT = '5432', PGUSER, PGPASSWORD, PGDATABASE } = process.env;
+
+  if (PGHOST && PGUSER && PGPASSWORD && PGDATABASE) {
+    const user = encodeURIComponent(PGUSER);
+    const password = encodeURIComponent(PGPASSWORD);
+    const database = encodeURIComponent(PGDATABASE);
+    return `postgresql://${user}:${password}@${PGHOST}:${PGPORT}/${database}`;
+  }
+
+  return '';
+}
 
 function getDatabaseHost(url) {
   if (!url) {

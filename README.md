@@ -84,11 +84,13 @@ If local startup fails with `getaddrinfo ENOTFOUND` for a host such as `postgres
    ```env
    NODE_ENV=production
    JWT_SECRET=replace-with-a-long-random-secret
-   DATABASE_URL=<Railway PostgreSQL connection URL>
+   DATABASE_URL=${{Postgres.DATABASE_URL}}
    DATABASE_SSL=false
    ```
 
    If your PostgreSQL connection requires SSL, set `DATABASE_SSL=true`.
+
+   If the app logs `DATABASE_URL is required in production`, the web service is missing the PostgreSQL reference variable. Open the Railway web service variables and add `DATABASE_URL` with the value `${{Postgres.DATABASE_URL}}` after adding the PostgreSQL service.
 
 5. Railway will run `npm install` and start the app with `npm start`.
 6. Open the generated public Railway domain and test signup, project creation, member invites, tasks, and dashboards.
